@@ -9,6 +9,14 @@ import {
 	SelectItem,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+	Table,
+	TableHeader,
+	TableRow,
+	TableHead,
+	TableBody,
+	TableCell,
+} from '@/components/ui/table';
 
 const UserSearch: React.FC = () => {
 	return (
@@ -46,6 +54,54 @@ const UserSearch: React.FC = () => {
 					</Label>
 					<Checkbox id="highlight" />
 				</div>
+			</div>
+			<div className="border rounded-lg">
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Name</TableHead>
+							<TableHead>City</TableHead>
+							<TableHead>Birthday</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						<TableRow>
+							<TableCell className="font-medium">
+								Alotta Fudge
+							</TableCell>
+							<TableCell>New York</TableCell>
+							<TableCell>1.3.1995</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell className="font-medium">
+								Anita Bath
+							</TableCell>
+							<TableCell>Jacksonville</TableCell>
+							<TableCell>7.5.1980</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell className="font-medium">
+								Paige Turner
+							</TableCell>
+							<TableCell>Washington</TableCell>
+							<TableCell>13.2.1975</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell className="font-medium">
+								Stan Still
+							</TableCell>
+							<TableCell>Dallas</TableCell>
+							<TableCell>31.10.1952</TableCell>
+						</TableRow>
+						<TableRow>
+							<TableCell className="font-medium">
+								Terry Aki
+							</TableCell>
+							<TableCell>Columbus</TableCell>
+							<TableCell>3.1.1960</TableCell>
+						</TableRow>
+					</TableBody>
+				</Table>
 			</div>
 		</div>
 	);
