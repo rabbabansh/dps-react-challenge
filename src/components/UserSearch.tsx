@@ -8,6 +8,7 @@ import {
 	SelectContent,
 	SelectItem,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const UserSearch: React.FC = () => {
 	return (
@@ -35,6 +36,15 @@ const UserSearch: React.FC = () => {
 							<SelectItem value="columbus">Columbus</SelectItem>
 						</SelectContent>
 					</Select>
+				</div>
+				<div className="flex items-center space-x-2">
+					<Label
+						htmlFor="highlight"
+						className="text-sm font-medium leading-none"
+					>
+						Highlight oldest per city
+					</Label>
+					<Checkbox id="highlight" />
 				</div>
 			</div>
 		</div>
