@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
@@ -49,19 +49,23 @@ const UserSearch: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	// State to store any error messages
 	const [error, setError] = useState<string | null>(null);
+	const [selectedCity, setSelectedCity] = useState<string>('all');
 
 	useEffect(() => {
 		// Function to fetch users from the API
 		const fetchUsers = async () => {
 			try {
+				console.log('Fetching users...');
 				const response = await fetch('https://dummyjson.com/users');
 				if (!response.ok) {
 					throw new Error('Failed to fetch users');
 				}
 				const data: ApiResponse = await response.json();
+				console.log('Fetched users:', data.users);
 				setUsers(data.users);
 				setLoading(false);
 			} catch (err) {
+				console.error('Error fetching users:', err);
 				setError(
 					err instanceof Error
 						? err.message
@@ -74,6 +78,12 @@ const UserSearch: React.FC = () => {
 		// Call the fetchUsers function when the component mounts
 		fetchUsers();
 	}, []); // Empty dependency array ensures this effect runs only once
+
+	const uniqueCities = useMemo(() => {
+		console.log('Calculating unique cities...');
+		const citySet = new Set(users.map((user) => user.address.city));
+		return Array.from(citySet).sort();
+	}, [users]);
 
 	// Show loading state while fetching data
 	if (loading) return <div>Loading...</div>;
@@ -92,20 +102,20 @@ const UserSearch: React.FC = () => {
 				{/* City filter dropdown */}
 				<div className="space-y-2">
 					<Label htmlFor="city">City</Label>
-					<Select>
+					<Select
+						value={selectedCity}
+						onValueChange={setSelectedCity}
+					>
 						<SelectTrigger id="city" aria-label="City">
 							<SelectValue placeholder="Select city" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="new-york">New York</SelectItem>
-							<SelectItem value="jacksonville">
-								Jacksonville
-							</SelectItem>
-							<SelectItem value="washington">
-								Washington
-							</SelectItem>
-							<SelectItem value="dallas">Dallas</SelectItem>
-							<SelectItem value="columbus">Columbus</SelectItem>
+							<SelectItem value="all">All Cities</SelectItem>
+							{uniqueCities.map((city) => (
+								<SelectItem key={city} value={city}>
+									{city}
+								</SelectItem>
+							))}
 						</SelectContent>
 					</Select>
 				</div>
@@ -131,18 +141,23 @@ const UserSearch: React.FC = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{/* Map through users and create a table row for each */}
-						{users.map((user) => (
-							<TableRow key={user.id}>
-								<TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
-								<TableCell>{user.address.city}</TableCell>
-								<TableCell>
-									{new Date(
-										user.birthDate
-									).toLocaleDateString()}
-								</TableCell>
-							</TableRow>
-						))}
+						{users
+							.filter(
+								(user) =>
+									selectedCity === 'all' ||
+									user.address.city === selectedCity
+							)
+							.map((user) => (
+								<TableRow key={user.id}>
+									<TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
+									<TableCell>{user.address.city}</TableCell>
+									<TableCell>
+										{new Date(
+											user.birthDate
+										).toLocaleDateString()}
+									</TableCell>
+								</TableRow>
+							))}
 					</TableBody>
 				</Table>
 			</div>
