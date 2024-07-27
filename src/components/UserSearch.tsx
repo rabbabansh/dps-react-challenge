@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
@@ -18,14 +18,78 @@ import {
 	TableCell,
 } from '@/components/ui/table';
 
+// Define the structure of the address object
+interface Address {
+	city: string;
+	street: string;
+	zipcode: string;
+}
+
+// Define the structure of a user object
+interface User {
+	id: number;
+	firstName: string;
+	lastName: string;
+	birthDate: string;
+	address: Address;
+}
+
+// Define the structure of the API response
+interface ApiResponse {
+	users: User[];
+	total: number;
+	skip: number;
+	limit: number;
+}
+
 const UserSearch: React.FC = () => {
+	// State to store the list of users
+	const [users, setUsers] = useState<User[]>([]);
+	// State to track if data is being loaded
+	const [loading, setLoading] = useState<boolean>(true);
+	// State to store any error messages
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		// Function to fetch users from the API
+		const fetchUsers = async () => {
+			try {
+				const response = await fetch('https://dummyjson.com/users');
+				if (!response.ok) {
+					throw new Error('Failed to fetch users');
+				}
+				const data: ApiResponse = await response.json();
+				setUsers(data.users);
+				setLoading(false);
+			} catch (err) {
+				setError(
+					err instanceof Error
+						? err.message
+						: 'An unknown error occurred'
+				);
+				setLoading(false);
+			}
+		};
+
+		// Call the fetchUsers function when the component mounts
+		fetchUsers();
+	}, []); // Empty dependency array ensures this effect runs only once
+
+	// Show loading state while fetching data
+	if (loading) return <div>Loading...</div>;
+	// Show error message if fetch failed
+	if (error) return <div>Error: {error}</div>;
+
 	return (
 		<div className="max-w-4xl mx-auto p-4 border rounded-lg">
+			{/* Search and filter controls */}
 			<div className="grid grid-cols-3 gap-4 mb-4">
+				{/* Name search input */}
 				<div className="space-y-2">
 					<Label htmlFor="name">Name</Label>
 					<Input id="name" placeholder="As you type search" />
 				</div>
+				{/* City filter dropdown */}
 				<div className="space-y-2">
 					<Label htmlFor="city">City</Label>
 					<Select>
@@ -45,6 +109,7 @@ const UserSearch: React.FC = () => {
 						</SelectContent>
 					</Select>
 				</div>
+				{/* Highlight checkbox */}
 				<div className="flex items-center space-x-2">
 					<Label
 						htmlFor="highlight"
@@ -55,6 +120,7 @@ const UserSearch: React.FC = () => {
 					<Checkbox id="highlight" />
 				</div>
 			</div>
+			{/* User data table */}
 			<div className="border rounded-lg">
 				<Table>
 					<TableHeader>
@@ -65,41 +131,18 @@ const UserSearch: React.FC = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						<TableRow>
-							<TableCell className="font-medium">
-								Alotta Fudge
-							</TableCell>
-							<TableCell>New York</TableCell>
-							<TableCell>1.3.1995</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell className="font-medium">
-								Anita Bath
-							</TableCell>
-							<TableCell>Jacksonville</TableCell>
-							<TableCell>7.5.1980</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell className="font-medium">
-								Paige Turner
-							</TableCell>
-							<TableCell>Washington</TableCell>
-							<TableCell>13.2.1975</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell className="font-medium">
-								Stan Still
-							</TableCell>
-							<TableCell>Dallas</TableCell>
-							<TableCell>31.10.1952</TableCell>
-						</TableRow>
-						<TableRow>
-							<TableCell className="font-medium">
-								Terry Aki
-							</TableCell>
-							<TableCell>Columbus</TableCell>
-							<TableCell>3.1.1960</TableCell>
-						</TableRow>
+						{/* Map through users and create a table row for each */}
+						{users.map((user) => (
+							<TableRow key={user.id}>
+								<TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
+								<TableCell>{user.address.city}</TableCell>
+								<TableCell>
+									{new Date(
+										user.birthDate
+									).toLocaleDateString()}
+								</TableCell>
+							</TableRow>
+						))}
 					</TableBody>
 				</Table>
 			</div>
