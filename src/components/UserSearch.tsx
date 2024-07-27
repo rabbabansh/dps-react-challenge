@@ -49,7 +49,10 @@ const UserSearch: React.FC = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	// State to store any error messages
 	const [error, setError] = useState<string | null>(null);
+	// State to store the selected city
 	const [selectedCity, setSelectedCity] = useState<string>('all');
+	// State to store the search term
+	const [searchTerm, setSearchTerm] = useState<string>('');
 
 	useEffect(() => {
 		// Function to fetch users from the API
@@ -79,11 +82,25 @@ const UserSearch: React.FC = () => {
 		fetchUsers();
 	}, []); // Empty dependency array ensures this effect runs only once
 
+	// Memoized list of unique cities
 	const uniqueCities = useMemo(() => {
 		console.log('Calculating unique cities...');
 		const citySet = new Set(users.map((user) => user.address.city));
 		return Array.from(citySet).sort();
 	}, [users]);
+
+	// Memoized filtered users based on search term and selected city
+	const filteredUsers = useMemo(() => {
+		console.log('Filtering users...');
+		return users.filter((user) => {
+			const nameMatch = (user.firstName + ' ' + user.lastName)
+				.toLowerCase()
+				.includes(searchTerm.toLowerCase());
+			const cityMatch =
+				selectedCity === 'all' || user.address.city === selectedCity;
+			return nameMatch && cityMatch;
+		});
+	}, [users, searchTerm, selectedCity]);
 
 	// Show loading state while fetching data
 	if (loading) return <div>Loading...</div>;
@@ -97,7 +114,12 @@ const UserSearch: React.FC = () => {
 				{/* Name search input */}
 				<div className="space-y-2">
 					<Label htmlFor="name">Name</Label>
-					<Input id="name" placeholder="As you type search" />
+					<Input
+						id="name"
+						placeholder="Search by name"
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+					/>
 				</div>
 				{/* City filter dropdown */}
 				<div className="space-y-2">
@@ -141,23 +163,17 @@ const UserSearch: React.FC = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{users
-							.filter(
-								(user) =>
-									selectedCity === 'all' ||
-									user.address.city === selectedCity
-							)
-							.map((user) => (
-								<TableRow key={user.id}>
-									<TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
-									<TableCell>{user.address.city}</TableCell>
-									<TableCell>
-										{new Date(
-											user.birthDate
-										).toLocaleDateString()}
-									</TableCell>
-								</TableRow>
-							))}
+						{filteredUsers.map((user) => (
+							<TableRow key={user.id}>
+								<TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
+								<TableCell>{user.address.city}</TableCell>
+								<TableCell>
+									{new Date(
+										user.birthDate
+									).toLocaleDateString()}
+								</TableCell>
+							</TableRow>
+						))}
 					</TableBody>
 				</Table>
 			</div>
