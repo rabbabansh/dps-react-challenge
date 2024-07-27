@@ -96,6 +96,20 @@ const UserSearch: React.FC = () => {
 		return Array.from(citySet).sort();
 	}, [users]);
 
+	// Memoized oldest users by city
+	const oldestByCity = useMemo(() => {
+		console.log('Calculating oldest users by city...'); // Debug log
+		const oldest: { [city: string]: Date } = {};
+		users.forEach((user) => {
+			const birthDate = new Date(user.birthDate);
+			const city = user.address.city;
+			if (!oldest[city] || birthDate < oldest[city]) {
+				oldest[city] = birthDate;
+			}
+		});
+		return oldest;
+	}, [users]);
+
 	// Memoized filtered users based on debounced search term, selected city, and highlight oldest option
 	const filteredUsers = useMemo(() => {
 		console.log('Filtering and processing users...'); // Debug log
@@ -109,27 +123,23 @@ const UserSearch: React.FC = () => {
 		});
 
 		if (highlightOldest) {
-			// Calculate the oldest birth date for each city
-			const oldestByCity: { [city: string]: Date } = {};
-			filtered.forEach((user) => {
-				const birthDate = new Date(user.birthDate);
-				const city = user.address.city;
-				if (!oldestByCity[city] || birthDate < oldestByCity[city]) {
-					oldestByCity[city] = birthDate;
-				}
-			});
-
-			// Add isOldest property to each user
+			// Add isOldest property to each user based on pre-calculated oldest users
 			return filtered.map((user) => ({
 				...user,
 				isOldest:
 					new Date(user.birthDate).getTime() ===
-					oldestByCity[user.address.city].getTime(),
+					oldestByCity[user.address.city]?.getTime(),
 			}));
 		}
 
 		return filtered;
-	}, [users, debouncedSearchTerm, selectedCity, highlightOldest]);
+	}, [
+		users,
+		debouncedSearchTerm,
+		selectedCity,
+		highlightOldest,
+		oldestByCity,
+	]);
 
 	// Show loading state while fetching data
 	if (loading) return <div>Loading...</div>;
