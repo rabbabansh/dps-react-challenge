@@ -17,6 +17,7 @@ import {
 	TableBody,
 	TableCell,
 } from '@/components/ui/table';
+import useDebounce from '@/hooks/useDebounce'; // Import the custom hook
 
 // Structure of the address object
 interface Address {
@@ -57,6 +58,9 @@ const UserSearch: React.FC = () => {
 	// State to control the highlighting of oldest users
 	const [highlightOldest, setHighlightOldest] = useState<boolean>(false);
 
+	// Debounced search term
+	const debouncedSearchTerm = useDebounce(searchTerm, 1000);
+
 	useEffect(() => {
 		// Function to fetch users from the API
 		const fetchUsers = async () => {
@@ -92,13 +96,13 @@ const UserSearch: React.FC = () => {
 		return Array.from(citySet).sort();
 	}, [users]);
 
-	// Memoized filtered users based on search term, selected city, and highlight oldest option
+	// Memoized filtered users based on debounced search term, selected city, and highlight oldest option
 	const filteredUsers = useMemo(() => {
 		console.log('Filtering and processing users...'); // Debug log
 		const filtered = users.filter((user) => {
 			const nameMatch = (user.firstName + ' ' + user.lastName)
 				.toLowerCase()
-				.includes(searchTerm.toLowerCase());
+				.includes(debouncedSearchTerm.toLowerCase());
 			const cityMatch =
 				selectedCity === 'all' || user.address.city === selectedCity;
 			return nameMatch && cityMatch;
@@ -125,7 +129,7 @@ const UserSearch: React.FC = () => {
 		}
 
 		return filtered;
-	}, [users, searchTerm, selectedCity, highlightOldest]);
+	}, [users, debouncedSearchTerm, selectedCity, highlightOldest]);
 
 	// Show loading state while fetching data
 	if (loading) return <div>Loading...</div>;
@@ -134,10 +138,8 @@ const UserSearch: React.FC = () => {
 
 	return (
 		<div className="max-w-4xl mx-auto p-4 border rounded-lg">
-
 			{/* Search and filter controls */}
 			<div className="grid grid-cols-3 gap-4 mb-4">
-
 				{/* Name search input */}
 				<div className="space-y-2">
 					<Label htmlFor="name">Name</Label>
