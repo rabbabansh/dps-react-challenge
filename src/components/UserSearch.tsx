@@ -18,23 +18,24 @@ import {
 	TableCell,
 } from '@/components/ui/table';
 
-// Define the structure of the address object
+// Structure of the address object
 interface Address {
 	city: string;
 	street: string;
 	zipcode: string;
 }
 
-// Define the structure of a user object
+// Structure of a user object
 interface User {
 	id: number;
 	firstName: string;
 	lastName: string;
 	birthDate: string;
 	address: Address;
+	isOldest?: boolean;
 }
 
-// Define the structure of the API response
+// Structure of the API response
 interface ApiResponse {
 	users: User[];
 	total: number;
@@ -53,22 +54,24 @@ const UserSearch: React.FC = () => {
 	const [selectedCity, setSelectedCity] = useState<string>('all');
 	// State to store the search term
 	const [searchTerm, setSearchTerm] = useState<string>('');
+	// State to control the highlighting of oldest users
+	const [highlightOldest, setHighlightOldest] = useState<boolean>(false);
 
 	useEffect(() => {
 		// Function to fetch users from the API
 		const fetchUsers = async () => {
 			try {
-				console.log('Fetching users...');
+				console.log('Fetching users...'); // Debug log
 				const response = await fetch('https://dummyjson.com/users');
 				if (!response.ok) {
 					throw new Error('Failed to fetch users');
 				}
 				const data: ApiResponse = await response.json();
-				console.log('Fetched users:', data.users);
+				console.log('Fetched users:', data.users); // Debug log
 				setUsers(data.users);
 				setLoading(false);
 			} catch (err) {
-				console.error('Error fetching users:', err);
+				console.error('Error fetching users:', err); // Error log
 				setError(
 					err instanceof Error
 						? err.message
@@ -84,15 +87,15 @@ const UserSearch: React.FC = () => {
 
 	// Memoized list of unique cities
 	const uniqueCities = useMemo(() => {
-		console.log('Calculating unique cities...');
+		console.log('Calculating unique cities...'); // Debug log
 		const citySet = new Set(users.map((user) => user.address.city));
 		return Array.from(citySet).sort();
 	}, [users]);
 
-	// Memoized filtered users based on search term and selected city
+	// Memoized filtered users based on search term, selected city, and highlight oldest option
 	const filteredUsers = useMemo(() => {
-		console.log('Filtering users...');
-		return users.filter((user) => {
+		console.log('Filtering and processing users...'); // Debug log
+		const filtered = users.filter((user) => {
 			const nameMatch = (user.firstName + ' ' + user.lastName)
 				.toLowerCase()
 				.includes(searchTerm.toLowerCase());
@@ -100,7 +103,29 @@ const UserSearch: React.FC = () => {
 				selectedCity === 'all' || user.address.city === selectedCity;
 			return nameMatch && cityMatch;
 		});
-	}, [users, searchTerm, selectedCity]);
+
+		if (highlightOldest) {
+			// Calculate the oldest birth date for each city
+			const oldestByCity: { [city: string]: Date } = {};
+			filtered.forEach((user) => {
+				const birthDate = new Date(user.birthDate);
+				const city = user.address.city;
+				if (!oldestByCity[city] || birthDate < oldestByCity[city]) {
+					oldestByCity[city] = birthDate;
+				}
+			});
+
+			// Add isOldest property to each user
+			return filtered.map((user) => ({
+				...user,
+				isOldest:
+					new Date(user.birthDate).getTime() ===
+					oldestByCity[user.address.city].getTime(),
+			}));
+		}
+
+		return filtered;
+	}, [users, searchTerm, selectedCity, highlightOldest]);
 
 	// Show loading state while fetching data
 	if (loading) return <div>Loading...</div>;
@@ -109,8 +134,10 @@ const UserSearch: React.FC = () => {
 
 	return (
 		<div className="max-w-4xl mx-auto p-4 border rounded-lg">
+
 			{/* Search and filter controls */}
 			<div className="grid grid-cols-3 gap-4 mb-4">
+
 				{/* Name search input */}
 				<div className="space-y-2">
 					<Label htmlFor="name">Name</Label>
@@ -121,6 +148,7 @@ const UserSearch: React.FC = () => {
 						onChange={(e) => setSearchTerm(e.target.value)}
 					/>
 				</div>
+
 				{/* City filter dropdown */}
 				<div className="space-y-2">
 					<Label htmlFor="city">City</Label>
@@ -141,17 +169,25 @@ const UserSearch: React.FC = () => {
 						</SelectContent>
 					</Select>
 				</div>
-				{/* Highlight checkbox */}
+
+				{/* Highlight oldest checkbox */}
 				<div className="flex items-center space-x-2">
+					<Checkbox
+						id="highlight"
+						checked={highlightOldest}
+						onCheckedChange={(checked) =>
+							setHighlightOldest(checked as boolean)
+						}
+					/>
 					<Label
 						htmlFor="highlight"
 						className="text-sm font-medium leading-none"
 					>
 						Highlight oldest per city
 					</Label>
-					<Checkbox id="highlight" />
 				</div>
 			</div>
+
 			{/* User data table */}
 			<div className="border rounded-lg">
 				<Table>
@@ -164,7 +200,10 @@ const UserSearch: React.FC = () => {
 					</TableHeader>
 					<TableBody>
 						{filteredUsers.map((user) => (
-							<TableRow key={user.id}>
+							<TableRow
+								key={user.id}
+								className={user.isOldest ? 'bg-blue-100' : ''}
+							>
 								<TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
 								<TableCell>{user.address.city}</TableCell>
 								<TableCell>
