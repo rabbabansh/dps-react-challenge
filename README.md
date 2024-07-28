@@ -2,43 +2,157 @@
 
 ## Overview
 
-This repository contains a very basic web application based on Typescript and React. Main application file is `App.tsx`. Node and npm are required.
+This project is a Customer Relationship Management (CRM) application built with React, TypeScript, and Tailwind CSS. It showcases a searchable and filterable list of users, demonstrating modern web development practices and UI/UX considerations.
 
-## Environment Setup
+![App Screenshot](/images/image.png)
 
-Ensure you have Node.js (v14.x or later) and npm (v6.x or later) installed.  
-To set up and run the application, execute the following commands:
+## Live Demo
+
+You can view a live demo of this application deployed on Vercel:
+
+[https://dps-react-challenge-fbdjyv8el-rabbabanshs-projects.vercel.app/](https://dps-react-challenge-fbdjyv8el-rabbabanshs-projects.vercel.app/)
+
+Feel free to explore the application's features and functionality before proceeding with the local installation.
+
+## Features
+
+-   **User Search:** Dynamic search functionality for filtering users by name.
+-   **City Filter:** Dropdown menu to filter users by city.
+-   **Oldest User Highlight:** Option to highlight the oldest user in each city.
+-   **Responsive Design:** Fully responsive layout that works on various screen sizes.
+-   **Dark Mode Support:** Toggle between light and dark modes for user preference.
+-   **Performance Optimization:** Debounced search input for improved performance.
+
+## Technologies Used
+
+-   React
+-   TypeScript
+-   Tailwind CSS
+-   shadcn/ui components
+-   Custom hooks (useDebounce)
+
+## Getting Started
+
+### Prerequisites
+
+-   Node.js (v14.x or later)
+-   npm (v6.x or later)
+
+### Installation
+
+1. Clone the repository:
+
+    ```
+    git clone https://github.com/rabbabansh/dps-react-challenge
+    ```
+
+2. Navigate to the project directory:
+
+    ```
+    cd dps-react-challenge
+    ```
+
+3. Install dependencies:
+
+    ```
+    npm install
+    ```
+
+4. Start the development server:
+
+    ```
+    npm run dev
+    ```
+
+5. Open your browser and visit `http://localhost:3000` to view the application.
+
+## Project Structure
 
 ```
-npm install
-npm run dev
+└── 📁src
+    └── App.css
+    └── App.tsx
+    └── 📁assets
+        └── DPS-dark.svg
+        └── DPS-light.svg
+    └── 📁components
+        └── SkeletonLoading.tsx
+        └── UserSearch.tsx
+        └── 📁theme
+            └── mode-toggle.tsx
+            └── theme-provider.tsx
+        └── 📁ui
+            └── button.tsx
+            └── checkbox.tsx
+            └── dropdown-menu.tsx
+            └── input.tsx
+            └── label.tsx
+            └── select.tsx
+            └── skeleton.tsx
+            └── table.tsx
+    └── 📁hooks
+        └── useDebounce.tsx
+    └── index.css
+    └── 📁lib
+        └── utils.ts
+    └── main.tsx
+    └── 📁types
+        └── index.tsx
+    └── vite-env.d.ts
 ```
 
-The application will then be accessible at http://localhost:3000.
+## Key Components
 
-## Project Context
+### UserSearch
 
-You will be enhancing a new CRM (Customer Relationship Management) software aimed at managing customer data efficiently. Your task is to develop a feature that displays a searchable list of customers.
+The main component of the application, `UserSearch`, handles the display and filtering of user data. It includes:
 
-Refer to the attached mockup image to guide your UI development 👇
+-   Search input for filtering by name
+-   City selection dropdown
+-   Checkbox for highlighting the oldest users
+-   Table display of filtered users
 
-![Mockup](images/mockup.png)
+### SkeletonLoading
 
-## Challenge Tasks
+A component that displays a loading skeleton while data is being fetched.
 
--   **Fork this project:** Start by forking this repository
--   **UI Implementation:** Implement the user interface according to the provided design mockup.
--   **Data Integration:** Utilize the endpoint https://dummyjson.com/users to fetch user data. If no filter is applied all data is displayed.
--   **Client-side Filtering:** Implement the following filters:
-    -   **Name Filter:** An input field that dynamically filters by `firstName` or `lastName` as you type.
-    -   **City Filter:** A dropdown that lists all cities present in the data. Users can select a city to filter the list accordingly.
-    -   **Highlight Feature:** A checkbox that when checked, highlights the oldest users within each city (use data field `city`)
-    -   **Optional:** Implement a 1-second debounce on the Name Filter input. This means the application should delay the filter action until 1 second has passed without any further input from the user. This optimization helps reduce the number of processing calls, enhancing performance.
--   **Submission:** After completing the challenge, email us the URL of your GitHub repository.
--   **Further information:**
-    -   If there is anything unclear regarding requirements, contact us by replying to our email.
-    -   Use small commits, we want to see your progress towards the solution.
-    -   Code clean and follow the best practices.
+### useDebounce Hook
 
-\
+A custom hook that debounces the search input, improving performance by reducing the number of filter operations.
+
+```typescript
+import { useState, useEffect } from 'react';
+
+function useDebounce<T>(value: T, delay: number): T {
+	const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+	useEffect(() => {
+		const handler = setTimeout(() => {
+			setDebouncedValue(value);
+		}, delay);
+
+		return () => {
+			clearTimeout(handler);
+		};
+	}, [value, delay]);
+
+	return debouncedValue;
+}
+
+export default useDebounce;
+```
+
+## Dark Mode
+
+The application supports both light and dark modes. The mode can be toggled using a selector in the UI. The custom DPS logo SVG adapts to the current mode, ensuring visibility in both light and dark themes.
+
+## API Integration
+
+The application fetches user data from the `https://dummyjson.com/users` endpoint. The data is then processed and filtered client-side based on user interactions.
+
+## Performance Considerations
+
+-   The search input is debounced to reduce unnecessary API calls or filtering operations.
+-   React's `useMemo` hook is utilized to optimize expensive calculations, such as filtering the user list.
+
 Happy coding!
