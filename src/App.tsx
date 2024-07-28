@@ -18,7 +18,7 @@ function AppContent() {
 
 	return (
 		<>
-			<div className="flex justify-between">
+			<div className="flex justify-between mx-auto max-w-4xl">
 				<a
 					href="https://www.digitalproductschool.io/"
 					target="_blank"
@@ -34,7 +34,7 @@ function AppContent() {
 					<ModeToggle />
 				</div>
 			</div>
-			<div className="home-card">
+			<div className="home-card pb-8">
 				<UserSearch />
 			</div>
 		</>

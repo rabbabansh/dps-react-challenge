@@ -119,7 +119,7 @@ const UserSearch: React.FC = () => {
 	if (error) return <div>Error: {error}</div>;
 
 	return (
-		<div className="max-w-4xl mx-auto p-4 border rounded-lg bg-card text-card-foreground">
+		<div className="max-w-4xl w-full mx-auto p-4 flex flex-col border rounded-lg bg-card text-card-foreground">
 			{/* Search and filter controls */}
 			<div className="grid grid-cols-3 gap-4 mb-4">
 				{/* Name search input */}
@@ -173,36 +173,44 @@ const UserSearch: React.FC = () => {
 			</div>
 
 			{/* User data table */}
-			<div className="border rounded-lg">
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Name</TableHead>
-							<TableHead>City</TableHead>
-							<TableHead>Birthday</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{filteredUsers.map((user) => (
-							<TableRow
-								key={user.id}
-								className={
-									user.isOldest
-										? 'bg-blue-100 dark:bg-blue-900'
-										: ''
-								}
-							>
-								<TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
-								<TableCell>{user.address.city}</TableCell>
-								<TableCell>
-									{new Date(
-										user.birthDate
-									).toLocaleDateString()}
-								</TableCell>
+			<div className="border rounded-lg flex-grow overflow-hidden flex flex-col">
+				<div className="overflow-auto flex-grow">
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead className="sticky top-0 bg-background">
+									Name
+								</TableHead>
+								<TableHead className="sticky top-0 bg-background">
+									City
+								</TableHead>
+								<TableHead className="sticky top-0 bg-background">
+									Birthday
+								</TableHead>
 							</TableRow>
-						))}
-					</TableBody>
-				</Table>
+						</TableHeader>
+						<TableBody>
+							{filteredUsers.map((user) => (
+								<TableRow
+									key={user.id}
+									className={
+										user.isOldest
+											? 'bg-blue-100 dark:bg-blue-900'
+											: ''
+									}
+								>
+									<TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
+									<TableCell>{user.address.city}</TableCell>
+									<TableCell>
+										{new Date(
+											user.birthDate
+										).toLocaleDateString()}
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
 			</div>
 		</div>
 	);
