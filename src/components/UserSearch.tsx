@@ -261,7 +261,7 @@ const UserSearch: React.FC = () => {
 								key={user.id}
 								className={
 									user.isOldest
-										? 'bg-blue-100 dark:bg-blue-800'
+										? 'bg-blue-100 dark:bg-blue-900'
 										: ''
 								}
 							>
