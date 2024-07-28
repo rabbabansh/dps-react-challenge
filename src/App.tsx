@@ -2,8 +2,8 @@ import lightLogo from './assets/DPS-light.svg';
 import darkLogo from './assets/DPS-dark.svg';
 import './App.css';
 import UserSearch from './components/UserSearch';
-import { ThemeProvider, useTheme } from '@/components/theme-provider';
-import { ModeToggle } from './components/mode-toggle';
+import { ThemeProvider, useTheme } from '@/components/theme/theme-provider';
+import { ModeToggle } from './components/theme/mode-toggle';
 
 function App() {
 	return (
