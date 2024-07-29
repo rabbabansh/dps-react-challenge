@@ -17,9 +17,13 @@ import {
 	TableBody,
 	TableCell,
 } from '@/components/ui/table';
+import { ArrowUpDown } from 'lucide-react';
 import useDebounce from '@/hooks/useDebounce';
 import { SkeletonLoading } from './SkeletonLoading';
 import { User, ApiResponse } from '@/types/index';
+
+type SortColumn = 'name' | 'city' | 'birthday';
+type SortDirection = 'asc' | 'desc';
 
 const UserSearch: React.FC = () => {
 	// State to store the list of users
@@ -34,6 +38,9 @@ const UserSearch: React.FC = () => {
 	const [searchTerm, setSearchTerm] = useState<string>('');
 	// State to control the highlighting of oldest users
 	const [highlightOldest, setHighlightOldest] = useState<boolean>(false);
+	// State to store the current sort column and direction
+	const [sortColumn, setSortColumn] = useState<SortColumn>('name');
+	const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
 	// Debounced search term
 	const debouncedSearchTerm = useDebounce(searchTerm, 1000);
@@ -93,6 +100,29 @@ const UserSearch: React.FC = () => {
 			return nameMatch && cityMatch;
 		});
 
+		// Apply sorting feature
+		filtered.sort((a, b) => {
+			let compareA, compareB;
+			switch (sortColumn) {
+			case 'name':
+				compareA = a.firstName + ' ' + a.lastName;
+				compareB = b.firstName + ' ' + b.lastName;
+				break;
+			case 'city':
+				compareA = a.address.city;
+				compareB = b.address.city;
+				break;
+			case 'birthday':
+				compareA = new Date(a.birthDate);
+				compareB = new Date(b.birthDate);
+				break;
+			}
+
+			if (compareA < compareB) return sortDirection === 'asc' ? -1 : 1;
+			if (compareA > compareB) return sortDirection === 'asc' ? 1 : -1;
+			return 0;
+		});
+
 		if (highlightOldest) {
 			// Add isOldest property to each user based on pre-calculated oldest users
 			return filtered.map((user) => ({
@@ -110,7 +140,18 @@ const UserSearch: React.FC = () => {
 		selectedCity,
 		highlightOldest,
 		oldestByCity,
+		sortColumn,
+		sortDirection,
 	]);
+
+	const handleSort = (column: SortColumn) => {
+		if (sortColumn === column) {
+			setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+		} else {
+			setSortColumn(column);
+			setSortDirection('asc');
+		}
+	};
 
 	if (loading) {
 		return <SkeletonLoading />;
@@ -178,14 +219,24 @@ const UserSearch: React.FC = () => {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead className="sticky top-0 bg-background">
-									Name
+								<TableHead
+									className="sticky top-0 bg-background cursor-pointer"
+									onClick={() => handleSort('name')}
+								>
+									Name <ArrowUpDown className="inline ml-2" />
 								</TableHead>
-								<TableHead className="sticky top-0 bg-background">
-									City
+								<TableHead
+									className="sticky top-0 bg-background cursor-pointer"
+									onClick={() => handleSort('city')}
+								>
+									City <ArrowUpDown className="inline ml-2" />
 								</TableHead>
-								<TableHead className="sticky top-0 bg-background">
-									Birthday
+								<TableHead
+									className="sticky top-0 bg-background cursor-pointer"
+									onClick={() => handleSort('birthday')}
+								>
+									Birthday{' '}
+									<ArrowUpDown className="inline ml-2" />
 								</TableHead>
 							</TableRow>
 						</TableHeader>
